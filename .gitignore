@@ -1,0 +1,11 @@
+node_modules/
+build/
+dist/
+.env
+.env.local
+.DS_Store
+npm-debug.log
+yarn-error.log
+# Firebase secrets
+serviceAccountKey.json
+.env

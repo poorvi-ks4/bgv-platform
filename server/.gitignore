@@ -1,0 +1,11 @@
+# Node
+node_modules/
+
+# Env files
+.env
+
+# Firebase service account (never commit)
+serviceAccountKey.json
+
+# PM2
+logs/
