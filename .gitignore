@@ -1,11 +1,43 @@
+# Dependencies
 node_modules/
-build/
-dist/
-.env
-.env.local
-.DS_Store
 npm-debug.log
 yarn-error.log
-# Firebase secrets
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Secrets & Keys
 serviceAccountKey.json
+*.key
+*.pem
+firebase-config.js
+
+# Build files
+build/
+dist/
+.next/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+server/uploads/
+
+# Firebase
+.firebase/
+.firebaserc
+serviceAccountKey.json
+*.json
 .env
