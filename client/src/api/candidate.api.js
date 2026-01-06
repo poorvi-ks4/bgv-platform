@@ -56,3 +56,17 @@ export const getMyProfile = async () => {
 };
 
 */
+
+export async function uploadDocument({ file, docType, userId, token }) {
+  const form = new FormData();
+  form.append('document', file);
+  form.append('docType', docType);
+  form.append('userId', userId || '');
+  const res = await fetch('/api/documents/upload', {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form
+  });
+  if (!res.ok) throw new Error('Upload failed');
+  return res.json();
+}

@@ -1,10 +1,22 @@
 import mongoose from 'mongoose';
 
-const documentSchema = new mongoose.Schema({
-  candidate: { type: mongoose.Schema.Types.ObjectId, ref: 'Candidate' },
-  name: { type: String },
-  storagePath: { type: String },
-  verified: { type: Boolean, default: false },
-}, { timestamps: true });
+const DocumentSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  docType: { type: String, required: true },
+  filename: { type: String, required: true },
+  originalName: { type: String, required: true },
+  mimeType: { type: String },
+  size: { type: Number },
+  path: { type: String },
+  status: { 
+    type: String, 
+    enum: ['uploaded', 'pending', 'approved', 'declined'], 
+    default: 'pending' 
+  },
+  declineReason: { type: String },
+  approvedAt: { type: Date },
+  declinedAt: { type: Date },
+  uploadedAt: { type: Date, default: Date.now }
+});
 
-export default mongoose.model('Document', documentSchema);
+export default mongoose.model('Document', DocumentSchema);

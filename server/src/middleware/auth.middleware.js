@@ -1,4 +1,4 @@
-import admin from "../config/firebase.js";
+import admin, { getAuth } from "../config/firebase.js";
 export const verifyFirebaseToken = async (req, res, next) => {
   try {
     console.log("🧪 Auth Header:", req.headers.authorization);
@@ -27,5 +27,23 @@ export const verifyFirebaseToken = async (req, res, next) => {
   } catch (err) {
     console.error("🔥 Firebase verify error FULL:", err);
     return res.status(403).json({ message: "Invalid or expired token" });
+  }
+};
+export const verifyToken = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split("Bearer ")[1];
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decodedToken = await getAuth().verifyIdToken(token);
+    console.log("🔐 Token verified, UID:", decodedToken.uid);
+
+    req.user = decodedToken;
+    req.decodedToken = token;
+    next();
+  } catch (err) {
+    console.error("❌ Token verification failed:", err.message);
+    res.status(401).json({ error: "Invalid token" });
   }
 };

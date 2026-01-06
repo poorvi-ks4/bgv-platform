@@ -2,14 +2,15 @@ import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
-    firebaseUid: { type: String, required: true, unique: true },
-    name: String,
-    email: String,
+    uid: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
+    name: { type: String },
     role: {
       type: String,
-      enum: ["candidate", "recruiter", "verifier", "admin"],
+      enum: ["candidate", "hr", "recruiter", "verifier"],
       required: true,
     },
+    createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );

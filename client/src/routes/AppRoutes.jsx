@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
-import Login from "../pages/auth/Login";
+import Login from "../pages/authz/Login";
 import CandidateDashboard from "../pages/candidate/CandidateDashboard";
-import RecruiterDashboard from "../pages/recruiter/RecruiterDashboard";
+import HRDashboard from "../pages/hr/HRDashboard";
 import VerifierDashboard from "../pages/verifier/VerifierDashboard";
 
 export default function AppRoutes() {
@@ -9,7 +9,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/candidate" element={<CandidateDashboard />} />
-      <Route path="/recruiter" element={<RecruiterDashboard />} />
+      <Route path="/hr" element={<HRDashboard />} />
       <Route path="/verifier" element={<VerifierDashboard />} />
     </Routes>
   );

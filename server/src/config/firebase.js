@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { getAuth } from "firebase-admin/auth";
 import fs from "fs";
 import path from "path";
 
@@ -35,3 +36,4 @@ if (!admin.apps.length) {
 }
 
 export default admin;
+export { getAuth };

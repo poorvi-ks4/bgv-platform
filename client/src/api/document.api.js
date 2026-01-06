@@ -1,15 +1,22 @@
-import Candidate from "../models/Candidate.js";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const authHeader = async () => {
-  const token = await getAuth().currentUser.getIdToken();
+  const user = getAuth().currentUser;
+  const token = await user.getIdToken();
   return { Authorization: `Bearer ${token}` };
 };
 
-export const saveDocumentMeta = async (payload) => {
+export const saveDocumentMeta = async (data) => {
   const headers = await authHeader();
-  return axios.post(`${API}/api/candidate/documents`, payload, { headers });
+
+  const res = await axios.post(
+    `${API_BASE_URL}/api/candidate/document`,
+    data,
+    { headers }
+  );
+
+  return res.data;
 };

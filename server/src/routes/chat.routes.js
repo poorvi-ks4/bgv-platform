@@ -1,22 +1,16 @@
 import express from "express";
-import { verifyFirebaseToken } from "../middleware/auth.middleware.js";
+import {
+  sendMessage,
+  getMessages,
+  getChatPartner,
+} from "../controllers/chat.controller.js";
+import { verifyToken } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-/**
- * TEMP handlers (to avoid crashes)
- * We'll implement real logic later
- */
-const getChatsForUser = (req, res) => {
-  res.json({ chats: [] });
-};
-
-const sendMessage = (req, res) => {
-  res.json({ success: true });
-};
-
 // Routes
-router.get("/", verifyFirebaseToken, getChatsForUser);
-router.post("/send", verifyFirebaseToken, sendMessage);
+router.post("/send", verifyToken, sendMessage);
+router.get("/messages/:candidateId/:otherUserId", verifyToken, getMessages);
+router.get("/partner/:candidateId", verifyToken, getChatPartner);
 
 export default router;

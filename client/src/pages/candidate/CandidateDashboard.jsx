@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Chat from '../../components/chat/ChatBox';
 import { savePersonalDetails } from "../../api/candidate.api";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import  { useEffect } from 'react';
-import { uploadFile } from "../../utils/uploadToFirebase";
-import { saveDocumentMeta } from "../../api/document.api";
+import '../../auth/firebase'; // Go up 2 levels
+
 const CandidateDashboard = ({ user }) => {
   const auth = getAuth();
 
 const [authReady, setAuthReady] = useState(false);
+
 useEffect(() => {
   const auth = getAuth();
   const unsub = onAuthStateChanged(auth, (user) => {
@@ -42,32 +43,68 @@ useEffect(() => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleFileUpload = (docType, e) => {
+  const handleFileUpload = async (docType, e) => {
+    console.log('🚀 handleFileUpload called with docType:', docType);
     const file = e.target.files[0];
-    if (file) {
-      setDocuments({
-        ...documents,
-        [docType]: { ...documents[docType], file, status: 'uploaded' }
+    if (!file) {
+      console.log('❌ No file selected');
+      return;
+    }
+
+    console.log('📄 File selected:', file.name, file.size);
+
+    setDocuments(prev => ({
+      ...prev,
+      [docType]: { ...prev[docType], file, status: 'uploading' }
+    }));
+
+    try {
+      const token = auth.currentUser && await auth.currentUser.getIdToken();
+      console.log('🔐 Token obtained:', token ? 'yes' : 'no');
+
+      const form = new FormData();
+      form.append('document', file);
+      form.append('docType', docType);
+      form.append('userId', auth.currentUser ? auth.currentUser.uid : '');
+
+      console.log('📤 Sending upload request to /api/documents/upload');
+      console.log('📋 FormData: docType=' + docType + ', userId=' + (auth.currentUser?.uid || 'none'));
+
+      const res = await fetch('/api/documents/upload', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: form
       });
+
+      console.log('📨 Response status:', res.status);
+      const data = await res.json();
+      console.log('📦 Response data:', data);
+
+      if (!res.ok) throw new Error('Upload failed');
+
+      setDocuments(prev => ({
+        ...prev,
+        [docType]: { ...prev[docType], file, status: data.status || 'uploaded', id: data._id }
+      }));
+    } catch (err) {
+      console.error('❌ Upload error:', err);
+      setDocuments(prev => ({
+        ...prev,
+        [docType]: { ...prev[docType], file: null, status: 'pending' }
+      }));
+      alert('Document upload failed: ' + err.message);
     }
   };
-const handleUploadAadhaar = async (file) => {
-  try {
-    const url = await uploadFile(file, "aadhaar");
-
-    await saveDocumentMeta({
-      type: "aadhaar",
-      url,
-    });
-
-    alert("Aadhaar uploaded successfully");
-  } catch (err) {
-    console.error(err);
-    alert("Upload failed");
-  }
-};
 
   const handleNext = () => {
+    if (currentStep === 2) {
+      // Validate all documents are uploaded
+      const allUploaded = Object.values(documents).every(doc => doc.file !== null);
+      if (!allUploaded) {
+        alert('❌ Please upload all required documents before proceeding');
+        return;
+      }
+    }
     if (currentStep < 4) setCurrentStep(currentStep + 1);
   };
 
@@ -380,7 +417,8 @@ const handleSaveDetails = async () => {
               color: 'white',
               border: 'none',
               borderRadius: '5px',
-              cursor: 'pointer'
+              cursor: currentStep === 2 && !Object.values(documents).every(d => d.file) ? 'not-allowed' : 'pointer',
+              opacity: currentStep === 2 && !Object.values(documents).every(d => d.file) ? 0.5 : 1
             }}
           >
             Next →
