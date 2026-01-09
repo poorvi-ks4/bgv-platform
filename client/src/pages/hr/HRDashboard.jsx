@@ -3,6 +3,7 @@ import { getAuth } from 'firebase/auth';
 import '../../auth/firebase'; // Go up 2 levels
 import VerifierChat from '../../components/chat/VerifierChat';
 import SimpleVerifierChat from '../../components/chat/SimpleVerifierChat';
+const API_BASE = 'http://51.21.134.155:5000';
 
 const HRDashboard = () => {
   const auth = getAuth();
@@ -18,7 +19,7 @@ const HRDashboard = () => {
   const fetchCandidates = async () => {
     try {
       const token = auth.currentUser && await auth.currentUser.getIdToken();
-      const res = await fetch('/api/hr/candidates', {
+      const res = await fetch(`${API_BASE}/api/hr/candidates`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const data = await res.json();
@@ -66,7 +67,7 @@ const HRDashboard = () => {
 
     try {
       const token = auth.currentUser && await auth.currentUser.getIdToken();
-      const res = await fetch(`/api/hr/documents/${docId}/approve`, {
+      const res = await fetch(`${API_BASE}/api/hr/documents/${docId}/approve`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

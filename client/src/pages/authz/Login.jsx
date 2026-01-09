@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 //import "../../config/firebase"; // Initialize Firebase
 import '../../auth/firebase'; // Initialize Firebase from auth folder
+const API_BASE = 'http://51.21.134.155:5000';
 
 const Login = () => {
   const [role, setRole] = useState("candidate");
@@ -17,14 +18,18 @@ const Login = () => {
       console.log("✅ Google login successful");
       console.log("📧 Email:", result.user.email);
 
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ role }),
-      });
+     const res = await fetch(
+  `${API_BASE}/api/auth/login`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ role }),
+  }
+);
+
 
       console.log("📨 Response status:", res.status);
       const data = await res.json();

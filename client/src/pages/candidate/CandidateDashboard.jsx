@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Chat from '../../components/chat/ChatBox';
-import { savePersonalDetails } from "../../api/candidate.api";
+import {uploadDocument, savePersonalDetails } from "../../api/candidate.api";
 import  { useEffect } from 'react';
 import '../../auth/firebase'; // Go up 2 levels
 
@@ -43,58 +43,41 @@ useEffect(() => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleFileUpload = async (docType, e) => {
-    console.log('🚀 handleFileUpload called with docType:', docType);
-    const file = e.target.files[0];
-    if (!file) {
-      console.log('❌ No file selected');
-      return;
-    }
+const handleFileUpload = async (e, docType) => {
+  console.log("🚀 handleFileUpload called with docType:", docType);
 
-    console.log('📄 File selected:', file.name, file.size);
+  const file = e.target.files[0];
+  if (!file) return;
 
-    setDocuments(prev => ({
-      ...prev,
-      [docType]: { ...prev[docType], file, status: 'uploading' }
-    }));
+  console.log("📄 File selected:", file.name, file.size);
 
-    try {
-      const token = auth.currentUser && await auth.currentUser.getIdToken();
-      console.log('🔐 Token obtained:', token ? 'yes' : 'no');
+  const token = await auth.currentUser.getIdToken();
+  console.log("🔐 Token obtained:", !!token);
 
-      const form = new FormData();
-      form.append('document', file);
-      form.append('docType', docType);
-      form.append('userId', auth.currentUser ? auth.currentUser.uid : '');
+  const formData = new FormData();
+  formData.append("document", file);
+  formData.append("docType", docType);
+  formData.append("userId", auth.currentUser.uid);
 
-      console.log('📤 Sending upload request to /api/documents/upload');
-      console.log('📋 FormData: docType=' + docType + ', userId=' + (auth.currentUser?.uid || 'none'));
+  try {
+    const res = await uploadDocument({ token, formData });
 
-      const res = await fetch('/api/documents/upload', {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: form
-      });
+    console.log("📨 Response status:", res.status);
 
-      console.log('📨 Response status:', res.status);
-      const data = await res.json();
-      console.log('📦 Response data:', data);
+    if (res.status !== 200 && res.status !== 201) {
+  throw new Error(`Upload failed: ${res.status}`);
+}
 
-      if (!res.ok) throw new Error('Upload failed');
+    //const data = await res.json();
+    console.log("✅ Upload success:", data);
 
-      setDocuments(prev => ({
-        ...prev,
-        [docType]: { ...prev[docType], file, status: data.status || 'uploaded', id: data._id }
-      }));
-    } catch (err) {
-      console.error('❌ Upload error:', err);
-      setDocuments(prev => ({
-        ...prev,
-        [docType]: { ...prev[docType], file: null, status: 'pending' }
-      }));
-      alert('Document upload failed: ' + err.message);
-    }
-  };
+    alert("Document uploaded successfully");
+  } catch (err) {
+    console.error("❌ Upload error:", err);
+    alert("Upload failed");
+  }
+};
+
 
   const handleNext = () => {
     if (currentStep === 2) {
@@ -278,8 +261,8 @@ const handleSaveDetails = async () => {
                     </div>
                     <input 
                       type="file" 
-                      onChange={(e) => handleFileUpload(docType, e)}
                       accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileUpload(e, docType)}
                       style={{ fontSize: '14px' }}
                     />
                   </div>

@@ -1,9 +1,10 @@
 import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import API_BASE_URL from "./api.config";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-//const API_BASE_URL =import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-
+/* =========================
+   WAIT FOR FIREBASE USER
+========================= */
 const waitForFirebaseUser = () =>
   new Promise((resolve, reject) => {
     const auth = getAuth();
@@ -12,7 +13,6 @@ const waitForFirebaseUser = () =>
       resolve(auth.currentUser);
       return;
     }
-console.log("🔥 ENV API URL:", import.meta.env.VITE_API_BASE_URL);
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();
@@ -21,20 +21,21 @@ console.log("🔥 ENV API URL:", import.meta.env.VITE_API_BASE_URL);
     });
   });
 
+/* =========================
+   AUTH HEADER
+========================= */
 const authHeader = async () => {
-
   const user = await waitForFirebaseUser();
   const token = await user.getIdToken(true);
-    console.log("🔥 SENDING TOKEN:", token.slice(0, 20), "...");
 
   return { Authorization: `Bearer ${token}` };
 };
+
+/* =========================
+   SAVE PERSONAL DETAILS
+========================= */
 export const savePersonalDetails = async (data) => {
-  console.log("📤 Sending personal details:", data);
-
   const headers = await authHeader();
-
-  console.log("🧪 Auth header being sent:", headers);
 
   const res = await axios.put(
     `${API_BASE_URL}/api/candidate/details`,
@@ -45,28 +46,25 @@ export const savePersonalDetails = async (data) => {
   return res.data;
 };
 
-/*
-export const getMyProfile = async () => {
-  const headers = await authHeader();
-  const res = await axios.get(
-    `${API_BASE_URL}/api/candidate/me`,
-    { headers }
+/* =========================
+   UPLOAD DOCUMENT
+========================= */
+export const uploadDocument = async ({ token, formData }) => {
+  const res = await fetch(
+    `${API_BASE_URL}/api/documents/upload`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+        // ❌ do NOT set Content-Type for FormData
+      },
+      body: formData
+    }
   );
-  return res.data;
-};
 
-*/
+  if (!res.ok) {
+    throw new Error("Upload failed");
+  }
 
-export async function uploadDocument({ file, docType, userId, token }) {
-  const form = new FormData();
-  form.append('document', file);
-  form.append('docType', docType);
-  form.append('userId', userId || '');
-  const res = await fetch('/api/documents/upload', {
-    method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    body: form
-  });
-  if (!res.ok) throw new Error('Upload failed');
   return res.json();
-}
+};

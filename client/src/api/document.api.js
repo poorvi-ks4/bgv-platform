@@ -1,7 +1,8 @@
 import axios from "axios";
 import { getAuth } from "firebase/auth";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE = "http://51.21.134.155:5000";
+;
 
 const authHeader = async () => {
   const user = getAuth().currentUser;
@@ -13,7 +14,7 @@ export const saveDocumentMeta = async (data) => {
   const headers = await authHeader();
 
   const res = await axios.post(
-    `${API_BASE_URL}/api/candidate/document`,
+    `${API_BASE}/api/candidate/document`,
     data,
     { headers }
   );

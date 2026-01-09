@@ -2,7 +2,7 @@ import axios from "axios";
 import { getAuth } from "firebase/auth";
 
 // Base API URL
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE = "http://51.21.134.155:5000";
 
 /**
  * Helper: Get Firebase ID token
@@ -30,7 +30,7 @@ export const addEducation = async (educationData) => {
   const headers = await getAuthHeader();
 
   const response = await axios.post(
-    `${API_BASE_URL}/api/education`,
+    `${API_BASE}/api/education`,
     educationData,
     { headers }
   );
@@ -46,7 +46,7 @@ export const getMyEducation = async () => {
   const headers = await getAuthHeader();
 
   const response = await axios.get(
-    `${API_BASE_URL}/api/education/me`,
+    `${API_BASE}/api/education/me`,
     { headers }
   );
 
@@ -61,7 +61,7 @@ export const deleteEducation = async (educationId) => {
   const headers = await getAuthHeader();
 
   const response = await axios.delete(
-    `${API_BASE_URL}/api/education/${educationId}`,
+    `${API_BASE}/api/education/${educationId}`,
     { headers }
   );
 
