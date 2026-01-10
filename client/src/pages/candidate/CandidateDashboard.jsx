@@ -51,25 +51,32 @@ const handleFileUpload = async (e, docType) => {
 
   console.log("📄 File selected:", file.name, file.size);
 
+  if (!auth.currentUser) {
+    alert("Auth not ready");
+    return;
+  }
+
   const token = await auth.currentUser.getIdToken();
   console.log("🔐 Token obtained:", !!token);
 
   const formData = new FormData();
-  formData.append("document", file);
-  formData.append("docType", docType);
-  formData.append("userId", auth.currentUser.uid);
+  formData.append("file", file);        // ✅ must be "file"
+  formData.append("docType", docType);  // ✅ REQUIRED by backend
 
   try {
-    const res = await uploadDocument({ token, formData });
+    // ✅ uploadDocument should return JSON
+    const data = await uploadDocument(formData);
 
-    console.log("📨 Response status:", res.status);
-
-    if (res.status !== 200 && res.status !== 201) {
-  throw new Error(`Upload failed: ${res.status}`);
-}
-
-    //const data = await res.json();
     console.log("✅ Upload success:", data);
+
+    // ✅ Update local state (important for Step 2 validation)
+    setDocuments(prev => ({
+      ...prev,
+      [docType]: {
+        file,
+        status: "pending"
+      }
+    }));
 
     alert("Document uploaded successfully");
   } catch (err) {
@@ -77,6 +84,7 @@ const handleFileUpload = async (e, docType) => {
     alert("Upload failed");
   }
 };
+
 
 
   const handleNext = () => {

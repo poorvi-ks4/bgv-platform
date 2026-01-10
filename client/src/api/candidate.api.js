@@ -2,6 +2,8 @@ import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import API_BASE_URL from "./api.config";
 
+const API_BASE = 'http://51.21.134.155:5000';
+
 /* =========================
    WAIT FOR FIREBASE USER
 ========================= */
@@ -49,13 +51,13 @@ export const savePersonalDetails = async (data) => {
 /* =========================
    UPLOAD DOCUMENT
 ========================= */
-export const uploadDocument = async ({ token, formData }) => {
+export const uploadDocument = async ( formData ) => {
   const res = await fetch(
     `${API_BASE_URL}/api/documents/upload`,
     {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`
+        
         // ❌ do NOT set Content-Type for FormData
       },
       body: formData
@@ -63,8 +65,9 @@ export const uploadDocument = async ({ token, formData }) => {
   );
 
   if (!res.ok) {
+    const text = await res.text();
     throw new Error("Upload failed");
   }
 
-  return res.json();
+return await res.json();
 };
