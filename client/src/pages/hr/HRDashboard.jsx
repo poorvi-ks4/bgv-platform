@@ -237,7 +237,7 @@ const HRDashboard = () => {
                       </div>
                       <div style={{ display: 'flex', gap: '8px', marginLeft: '10px' }}>
                         <a 
-                          href={`/api/documents/download/${doc._id}`}
+                          href={`http://51.21.134.155:5000/api/documents/download/${doc._id}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{

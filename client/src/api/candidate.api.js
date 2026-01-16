@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import API_BASE_URL from "./api.config";
 
 const API_BASE = 'http://51.21.134.155:5000';
+//const API_BASE_URL = 'http://51.21.134.155:5000';
 
 /* =========================
    WAIT FOR FIREBASE USER
@@ -51,23 +52,22 @@ export const savePersonalDetails = async (data) => {
 /* =========================
    UPLOAD DOCUMENT
 ========================= */
-export const uploadDocument = async ( formData ) => {
+export const uploadDocument = async (formData) => {
+  const headers = await authHeader();
+
   const res = await fetch(
     `${API_BASE_URL}/api/documents/upload`,
     {
       method: "POST",
-      headers: {
-        
-        // ❌ do NOT set Content-Type for FormData
-      },
+      headers, // ✅ contains Authorization: Bearer <token>
       body: formData
     }
   );
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error("Upload failed");
+    throw new Error(text || "Upload failed");
   }
 
-return await res.json();
+  return await res.json();
 };
