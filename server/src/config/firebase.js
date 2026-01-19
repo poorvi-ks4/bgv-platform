@@ -1,39 +1,34 @@
-import admin from "firebase-admin";
-import { getAuth } from "firebase-admin/auth";
-import fs from "fs";
+import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from "url";
 
-// Resolve repo root (because you run node from /server)
-const serviceAccountPath = path.resolve(
-  process.cwd(),
-  "..",
-  "serviceAccountKey.json"
-);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Debug logs
-console.log("🔥🔥 LOADING firebase.js FROM:", import.meta.url);
-console.log("🔥 Service account path:", serviceAccountPath);
-console.log("🔥 Service account exists:", fs.existsSync(serviceAccountPath));
+// 🔥 Explicitly load .env from /server/.env
+dotenv.config({
+  path: path.resolve(__dirname, "../../.env"),
+});
 
-if (!fs.existsSync(serviceAccountPath)) {
-  throw new Error(
-    `❌ serviceAccountKey.json not found at ${serviceAccountPath}`
-  );
+import admin from "firebase-admin";
+import fs from "fs";
+
+const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+
+if (!serviceAccountPath) {
+  throw new Error("FIREBASE_SERVICE_ACCOUNT_PATH is not defined");
 }
 
-const serviceAccount = JSON.parse(
-  fs.readFileSync(serviceAccountPath, "utf8")
-);
-
-console.log("🔥 Firebase Project ID:", serviceAccount.project_id);
-
-// Initialize Firebase Admin ONCE
 if (!admin.apps.length) {
+  const serviceAccount = JSON.parse(
+    fs.readFileSync(serviceAccountPath, "utf8")
+  );
+
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    projectId: serviceAccount.project_id,
   });
+
+  console.log("Firebase initialized");
 }
 
 export default admin;
-export { getAuth };

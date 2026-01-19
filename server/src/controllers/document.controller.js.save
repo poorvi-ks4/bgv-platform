@@ -1,5 +1,6 @@
 import Document from "../models/Document.model.js";
-
+import path from "path";
+import fs from "fs";
 export const downloadDocument = async (req, res) => {
   try {
     const { id } = req.params;
@@ -9,7 +10,7 @@ export const downloadDocument = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    // Optional access check
+    // Optional: ensure user has access
     // if (doc.userId !== req.user.uid) {
     //   return res.status(403).json({ message: "Access denied" });
     // }
@@ -26,7 +27,6 @@ export const downloadDocument = async (req, res) => {
     res.status(500).json({ message: "Download failed" });
   }
 };
-
 export const uploadDocument = async (req, res) => {
   try {
     console.log("📥 uploadDocument called");

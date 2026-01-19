@@ -1,52 +1,62 @@
-import express from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import morgan from 'morgan';
-import { json, urlencoded } from 'express';
-import chatRoutes from './routes/chat.routes.js';
+import express from "express";
+import cors from "cors";
+import { json, urlencoded } from "express";
+import multer from "multer";
+import hrRoutes from "./routes/hr.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import educationRoutes from "./routes/education.routes.js";
 import candidateRoutes from "./routes/candidate.routes.js";
-import documentsRouter from './routes/documents.routes.js';
-//const documentsRouter = require('./routes/documents.routes');
-import hrRoutes from './routes/hr.routes.js';
-
+import documentsRouter from "./routes/document.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
+import keyRoutes from './routes/keys.js';
 
 const app = express();
 
-app.use(helmet());
+// ===== Core Middleware =====
 app.use(cors());
-app.use(morgan('dev'));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
-// Log all incoming requests
+// ===== Request Logger =====
 app.use((req, res, next) => {
   console.log(`🔍 ${req.method} ${req.path}`);
   next();
 });
-app.use('/api/hr', hrRoutes);
+
+// ===== Routes =====
+console.log("📡 Registering API routes");
+
+app.use("/api/hr", hrRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/education", educationRoutes);
-app.use('/api/documents', documentsRouter);
-console.log('📡 Registering /api/documents routes');
-//app.use('/api/documents', documentsRouter);
-app.get('/', (req, res) => res.json({ ok: true, message: 'BGV Platform API' }));
-
-// API routes
-app.use('/api/chat', chatRoutes);
 app.use("/api/candidate", candidateRoutes);
-
-// 404 handler - log what was requested
-app.use((req, res) => {
-  console.log(`❌ 404 Not Found: ${req.method} ${req.path}`);
-  res.status(404).json({ message: 'Not found', path: req.path });
+app.use("/api/documents", documentsRouter);
+app.use("/api/chat", chatRoutes);
+app.use('/api/keys' ,keyRoutes);
+// ===== Health Check =====
+app.get("/", (req, res) => {
+  res.json({ ok: true, message: "BGV Platform API" });
 });
 
-// error handler
+// ===== 404 Handler =====
+app.use((req, res) => {
+  console.log(`❌ 404 Not Found: ${req.method} ${req.path}`);
+  res.status(404).json({
+    message: "Not found",
+    path: req.path
+  });
+});
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ message: 'Internal Server Error' });
+  if (err instanceof multer.MulterError) {
+    console.error("📛 Multer error:", err.message);
+    return res.status(400).json({ message: err.message });
+  }
+  next(err);
+});
+// ===== Global Error Handler =====
+app.use((err, req, res, next) => {
+  console.error("🔥 Unhandled error:", err);
+  res.status(500).json({ message: "Internal Server Error" });
 });
 
 export default app;

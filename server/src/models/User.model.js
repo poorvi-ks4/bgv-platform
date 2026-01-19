@@ -7,11 +7,26 @@ const UserSchema = new mongoose.Schema(
     name: { type: String },
     role: {
       type: String,
-      enum: ["candidate", "hr", "recruiter", "verifier"],
+      enum: ["candidate", "hr", "recruiter", "verifier","verifier_external"],
       required: true,
+    },
+publicKey: {
+      type: String, // base64
+    },
+
+    // Optional: helps audits
+    verifierType: {
+      type: String,
+      enum: [
+        "school_principal",
+        "college_registrar",
+        "previous_employer",
+        "government"
+      ],
     },
     createdAt: { type: Date, default: Date.now },
   },
+
   { timestamps: true }
 );
 

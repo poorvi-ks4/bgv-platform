@@ -1,15 +1,39 @@
 import mongoose from 'mongoose';
 
-const ChatMessageSchema = new mongoose.Schema({
-  candidateId: { type: String, required: true },
-  senderId: { type: String, required: true },
-  senderRole: { type: String, enum: ['hr', 'verifier'], required: true },
-  senderPublicKey: { type: String },
-  receiverId: { type: String, required: true },
-  encryptedMessage: { type: String, required: true },
-  nonce: { type: String, required: true },
-  read: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
-});
+const ChatMessageSchema = new mongoose.Schema(
+  {
+    // 🔒 Anchor to ONE verification case
+    verification: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Verification',
+      required: true
+    },
+
+    // Firebase UID of sender
+    senderId: {
+      type: String,
+      required: true
+    },
+
+    // Firebase UID of receiver
+    receiverId: {
+      type: String,
+      required: true
+    },
+
+    // 🔐 Encrypted message ONLY (backend never sees plaintext)
+    ciphertext: {
+      type: String,
+      required: true
+    },
+
+    // Read receipt (optional, safe)
+    read: {
+      type: Boolean,
+      default: false
+    }
+  },
+  { timestamps: true }
+);
 
 export default mongoose.model('ChatMessage', ChatMessageSchema);
